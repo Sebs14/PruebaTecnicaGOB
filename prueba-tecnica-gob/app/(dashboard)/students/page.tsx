@@ -150,22 +150,22 @@ export default function StudentsPage() {
                   >
                     <td className='whitespace-nowrap px-6 py-4'>
                       <div className='font-medium text-zinc-900 dark:text-white'>
-                        {student.nombre_estudiante}
+                        {student.nombreEstudiante}
                       </div>
                     </td>
                     <td className='whitespace-nowrap px-6 py-4 font-mono text-sm text-zinc-600 dark:text-zinc-400'>
                       {student.nue}
                     </td>
                     <td className='whitespace-nowrap px-6 py-4 text-zinc-600 dark:text-zinc-400'>
-                      {student.anio_inicio}
+                      {student.anioInicio}
                     </td>
                     <td className='whitespace-nowrap px-6 py-4'>
                       <span className='font-medium text-zinc-900 dark:text-white'>
-                        {student.promedio_actual.toFixed(2)}
+                        {student.promedioActual?.toFixed(2) ?? 'N/A'}
                       </span>
-                      {student.graduado && student.promedio_graduacion && (
+                      {student.graduado && student.promedioGraduacion && (
                         <span className='ml-2 text-sm text-zinc-500'>
-                          (Grad: {student.promedio_graduacion.toFixed(2)})
+                          (Grad: {student.promedioGraduacion.toFixed(2)})
                         </span>
                       )}
                     </td>

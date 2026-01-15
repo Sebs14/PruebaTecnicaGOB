@@ -26,22 +26,15 @@ export default function DashboardPage() {
           totalStudents: 1250,
           graduatedStudents: 450,
           activeStudents: 800,
-          averageGrade: 7.8,
-          studentsByYear: [
-            { year: 2019, count: 150 },
-            { year: 2020, count: 200 },
-            { year: 2021, count: 280 },
-            { year: 2022, count: 320 },
-            { year: 2023, count: 300 },
-          ],
-          gradeDistribution: [
-            { range: '0-5', count: 50 },
-            { range: '5-6', count: 150 },
-            { range: '6-7', count: 300 },
-            { range: '7-8', count: 400 },
-            { range: '8-9', count: 250 },
-            { range: '9-10', count: 100 },
-          ],
+          averageScore: 7.8,
+          byGender: { M: 600, F: 650 },
+          byYear: {
+            2019: 150,
+            2020: 200,
+            2021: 280,
+            2022: 320,
+            2023: 300,
+          },
         });
       } finally {
         setIsLoading(false);
@@ -102,7 +95,7 @@ export default function DashboardPage() {
         />
         <StatCard
           title='Promedio General'
-          value={stats.averageGrade.toFixed(2)}
+          value={stats.averageScore?.toFixed(2) ?? 'N/A'}
           icon={<ChartIcon />}
         />
       </div>
@@ -114,15 +107,30 @@ export default function DashboardPage() {
           <h3 className='mb-4 text-lg font-semibold text-zinc-900 dark:text-white'>
             Estudiantes por Año de Ingreso
           </h3>
-          <StudentsByYearChart data={stats.studentsByYear} />
+          <StudentsByYearChart
+            data={Object.entries(stats.byYear).map(([year, count]) => ({
+              year: Number(year),
+              count,
+            }))}
+          />
         </div>
 
-        {/* Distribución de Notas */}
+        {/* Distribución por Género */}
         <div className='rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800'>
           <h3 className='mb-4 text-lg font-semibold text-zinc-900 dark:text-white'>
-            Distribución de Promedios
+            Distribución por Género
           </h3>
-          <GradeDistributionChart data={stats.gradeDistribution} />
+          <GradeDistributionChart
+            data={Object.entries(stats.byGender).map(([range, count]) => ({
+              range:
+                range === 'M'
+                  ? 'Masculino'
+                  : range === 'F'
+                  ? 'Femenino'
+                  : range,
+              count,
+            }))}
+          />
         </div>
       </div>
 
