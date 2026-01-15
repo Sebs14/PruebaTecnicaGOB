@@ -94,7 +94,8 @@ export function UploadForm({ onSuccess }: UploadFormProps) {
     try {
       const response = await studentService.bulkUpload(parseResult.validRows);
 
-      if (response.success) {
+      if (response.success && response.errors.length === 0) {
+        // Todos insertados sin errores
         toast.success(
           `${response.inserted} estudiantes insertados exitosamente`
         );
@@ -104,11 +105,62 @@ export function UploadForm({ onSuccess }: UploadFormProps) {
           fileInputRef.current.value = '';
         }
         onSuccess?.();
+      } else if (response.inserted > 0) {
+        // Algunos insertados, algunos con errores (inserción parcial)
+        const backendErrors = response.errors.map((err) => ({
+          row: err.row,
+          field: err.field || 'desconocido',
+          value: '',
+          message: err.message,
+        }));
+        setParseResult({
+          ...parseResult,
+          success: false,
+          errors: backendErrors,
+        });
+        toast.success(`${response.inserted} estudiantes insertados.`);
+        if (response.errors.length > 0) {
+          toast.warning(`${response.errors.length} registros ignorados por errores.`);
+        }
+        onSuccess?.();
       } else {
-        toast.error(`Error al insertar: ${response.errors.length} errores`);
+        // Ninguno insertado, todos con errores
+        const backendErrors = response.errors.map((err) => ({
+          row: err.row,
+          field: err.field || 'desconocido',
+          value: '',
+          message: err.message,
+        }));
+        setParseResult({
+          ...parseResult,
+          success: false,
+          errors: [...parseResult.errors, ...backendErrors],
+        });
+        toast.error(`No se pudo insertar ningún registro. Revisa los detalles abajo.`);
       }
-    } catch (error) {
-      toast.error('Error al subir los datos');
+    } catch (error: unknown) {
+      // Manejar errores de la API con mensaje específico
+      const apiError = error as { message?: string | string[]; errors?: Array<{ row: number; field: string; message: string }> };
+      
+      if (apiError.errors && Array.isArray(apiError.errors)) {
+        const backendErrors = apiError.errors.map((err) => ({
+          row: err.row,
+          field: err.field || 'desconocido',
+          value: '',
+          message: err.message,
+        }));
+        setParseResult({
+          ...parseResult,
+          success: false,
+          errors: [...parseResult.errors, ...backendErrors],
+        });
+        toast.error(`Error del servidor: ${apiError.errors.length} errores. Revisa los detalles abajo.`);
+      } else {
+        const message = Array.isArray(apiError.message) 
+          ? apiError.message.join(', ') 
+          : (apiError.message || 'Error al subir los datos');
+        toast.error(message);
+      }
       console.error(error);
     } finally {
       setIsUploading(false);
