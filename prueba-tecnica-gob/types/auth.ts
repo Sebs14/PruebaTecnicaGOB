@@ -17,7 +17,7 @@ export interface AuthState {
 }
 
 export interface LoginResponse {
-  success: boolean;
+  message: string;
   user: User;
-  message?: string;
+  accessToken: string; // Token para enviar en headers
 }

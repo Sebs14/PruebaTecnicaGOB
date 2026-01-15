@@ -4,6 +4,7 @@ import { useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../stores/authStore';
 import { authService } from '../services/authService';
+import { tokenStorage } from '@/lib/api/client';
 import type { LoginCredentials } from '@/types';
 
 export function useAuth() {
@@ -20,10 +21,18 @@ export function useAuth() {
   // Verificar sesión al cargar
   useEffect(() => {
     const checkAuth = async () => {
+      // Si no hay token guardado, no intentar verificar
+      const token = tokenStorage.getToken();
+      if (!token) {
+        setUser(null);
+        return;
+      }
+
       try {
         const currentUser = await authService.getCurrentUser();
         setUser(currentUser);
       } catch {
+        tokenStorage.removeToken();
         setUser(null);
       }
     };
@@ -38,6 +47,8 @@ export function useAuth() {
       setLoading(true);
       try {
         const response = await authService.login(credentials);
+        // Guardar el token en localStorage
+        tokenStorage.setToken(response.accessToken);
         setUser(response.user);
         router.push('/');
         return { success: true };
@@ -57,6 +68,8 @@ export function useAuth() {
     } catch {
       // Ignorar error de logout en el servidor
     } finally {
+      // Limpiar token de localStorage
+      tokenStorage.removeToken();
       clearAuth();
       router.push('/login');
     }

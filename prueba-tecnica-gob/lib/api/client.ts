@@ -1,6 +1,9 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
+// Constante para la clave del token en localStorage
+const TOKEN_KEY = 'access_token';
+
 interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
 }
@@ -10,6 +13,24 @@ interface ApiError {
   status: number;
   errors?: Record<string, string[]>;
 }
+
+// Funciones para manejar el token
+export const tokenStorage = {
+  getToken: (): string | null => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(TOKEN_KEY);
+  },
+  setToken: (token: string): void => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(TOKEN_KEY, token);
+    }
+  },
+  removeToken: (): void => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+  },
+};
 
 class ApiClient {
   private baseUrl: string;
@@ -31,13 +52,17 @@ class ApiClient {
       url += `?${searchParams.toString()}`;
     }
 
+    // Obtener token de localStorage para incluirlo en los headers
+    const token = tokenStorage.getToken();
+
     const config: RequestInit = {
       ...fetchOptions,
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...fetchOptions.headers,
       },
-      credentials: 'include', // Para enviar cookies httpOnly
+      credentials: 'include', // Mantener para cookies como fallback
     };
 
     const response = await fetch(url, config);
