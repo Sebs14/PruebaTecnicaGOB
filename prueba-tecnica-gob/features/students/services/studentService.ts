@@ -23,7 +23,20 @@ export const studentService = {
     if (params?.limit) queryParams.limit = String(params.limit);
     if (params?.search) queryParams.search = params.search;
 
-    return api.get('/students', queryParams);
+    const response = await api.get<{
+      data: Student[];
+      total: number;
+      page: number;
+      totalPages: number;
+    }>('/students', queryParams);
+
+    // Map backend response to expected format
+    return {
+      students: response.data,
+      total: response.total,
+      page: response.page,
+      totalPages: response.totalPages,
+    };
   },
 
   getById: async (id: string): Promise<Student> => {

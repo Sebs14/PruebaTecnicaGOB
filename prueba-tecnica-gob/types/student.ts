@@ -1,19 +1,21 @@
 export interface Student {
   id: string;
-  nombre_estudiante: string;
-  anio_inicio: number;
-  nue: number;
-  promedio_actual: number;
-  promedio_graduacion: number | null;
+  nombreEstudiante: string;
+  anioInicio: number;
+  nue: string;
+  genero: string;
+  promedioActual: number;
+  promedioGraduacion: number | null;
   graduado: boolean;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface StudentUploadRow {
   nombre_estudiante: string;
   anio_inicio: number;
   nue: number;
+  genero?: string;
   promedio_actual: number;
   promedio_graduacion: number | null;
   graduado: boolean;
@@ -37,7 +39,7 @@ export interface DashboardStats {
   totalStudents: number;
   graduatedStudents: number;
   activeStudents: number;
-  averageGrade: number;
-  studentsByYear: { year: number; count: number }[];
-  gradeDistribution: { range: string; count: number }[];
+  averageScore: number;
+  byGender: Record<string, number>;
+  byYear: Record<number, number>;
 }
